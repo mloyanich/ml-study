@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -15,6 +16,17 @@ BASE_FEATURES = [
 
 class CarPrice:
     def __init__(self):
+        # Initialize logger
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.setLevel(logging.INFO)
+        handler = logging.StreamHandler()
+        file_handler = logging.FileHandler("car_price.log")
+        formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        file_handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+        self.logger.addHandler(file_handler)
+
         # Set the style for the plots to dark theme
         sns.set_theme(style="darkgrid")
         plt.style.use("dark_background")
@@ -23,22 +35,25 @@ class CarPrice:
         # Create a PDF file to save the plots
         output_pdf = "plots.pdf"
         self.pdf = PdfPages(output_pdf)
-        print(f"Plots will be saved as {output_pdf}")
+        self.logger.debug("Plots will be saved as %s", output_pdf)
 
-        df = pd.read_csv("data.csv")
+        df = pd.read_csv("data/data.csv")
+        self.logger.debug("Data loaded successfully from '%s'", "data/data.csv")
 
         df.columns = df.columns.str.lower().str.replace(" ", "_")
+        self.logger.debug("Columns after normalization: %s", df.columns.tolist())
 
         string_columns = list(df.dtypes[df.dtypes == "object"].index)
         for col in string_columns:
             df[col] = df[col].str.lower().str.replace(" ", "_")
+        self.logger.debug("String columns normalized: %s", string_columns)
 
         self.df = self.extract_features(df)
 
-        print(f"len(df): {len(self.df)}")
-        print(f"df.head(): {self.df.head()}")
-        print(f"df.columns: {self.df.columns}")
-        print(f"self.features: {self.features}")
+        self.logger.debug("Dataframe length: %d", len(self.df))
+        self.logger.debug("Dataframe head: %s", self.df.head())
+        self.logger.debug("Dataframe columns: %s", self.df.columns.tolist())
+        self.logger.debug("Initial features: %s", self.features)
         self.prep_data()
 
     def plot(self, title=None, xlabel=None, ylabel=None, print_result=False):
@@ -54,6 +69,7 @@ class CarPrice:
         if print_result:
             plt.show()
         plt.close()  # Close the plot to free up memory
+        self.logger.debug("Plot saved with title: %s", title)
 
     def plt_fig(self):
         plt.figure(figsize=(10, 6))
@@ -72,12 +88,15 @@ class CarPrice:
         XTX_inv = np.linalg.inv(XTX)
         w = XTX_inv.dot(X.T).dot(y)
 
+        self.logger.debug("Linear regression trained with regularization: %f", r)
         return w[0], w[1:]
 
     def rmse(self, y, y_pred):
         error = y_pred - y
         mse = (error**2).mean()
-        return np.sqrt(mse)
+        rmse_value = np.sqrt(mse)
+        self.logger.debug("Computed RMSE: %f", rmse_value)
+        return rmse_value
 
     def feature_eng(self, df, column_name, prefix, n_features=3):
         feature_set = df[column_name].value_counts().head(n_features).index
@@ -85,10 +104,13 @@ class CarPrice:
         for f in feature_set:
             feature = f"{prefix}_{f}"
             if self.features and feature not in self.features:
-                print(f"skipping feature {feature}")
+                self.logger.debug("Skipping feature: %s", feature)
                 continue
             df[feature] = (df[column_name] == f).astype(int)
             features.append(feature)
+        self.logger.debug(
+            "Features engineered for column '%s': %s", column_name, features
+        )
         return features
 
     def extract_features(self, df_input):
@@ -98,7 +120,7 @@ class CarPrice:
         else:
             features = BASE_FEATURES.copy()
 
-        df["age"] = 2025 - df.year
+        df["age"] = 2017 - df.year
         features.append("age")
 
         df["number_of_doors"] = df["number_of_doors"].fillna(0).astype(int)
@@ -122,6 +144,7 @@ class CarPrice:
                     df[feature] = 0
         if not self.features:
             self.features = features
+        self.logger.debug("Extracted features: %s", self.features)
         return df
 
     def prepare_X(self, df):
@@ -133,7 +156,7 @@ class CarPrice:
         df_num = df[features]
         df_num = df_num.fillna(0)
 
-        print(df_num.std())
+        self.logger.debug("Feature standard deviations: %s", df_num.std())
         X = df_num.values
         return X, features
 
@@ -144,6 +167,7 @@ class CarPrice:
             if item not in unique_array:
                 unique_array.append(item)
 
+        self.logger.debug("Deduplicated features: %s", unique_array)
         return unique_array
 
     def predict(self, car_listing):
@@ -159,17 +183,16 @@ class CarPrice:
             if col not in cols:
                 del df_test[col]
 
-        print(df_test.columns)
+        self.logger.debug("Test dataframe columns: %s", df_test.columns)
         X_test, features = self.prepare_X(df_test)
-        print(features)
+        self.logger.debug("Features used for prediction: %s", features)
         y_pred = self.w0 + X_test.dot(self.w)
+        self.logger.debug("Prediction made for input: %s", car_listing)
         return np.expm1(y_pred)
 
-    def train_and_validate(self, r):
+    def train_and_validate(self, r=0.0):
         w0, w = self.train_linear_reg(r)
-        print(self.features)
-        print(w)
-        print("%5s, %.2f, %.2f, %.2f" % (r, w0, w[13], w[20]))
+        self.logger.debug("Trained weights: w0=%f, w=%s", w0, w)
         y_pred = w0 + self.X_train.dot(w)
 
         self.plt_fig()
@@ -185,10 +208,11 @@ class CarPrice:
         sns.histplot(self.y_val, label="Validation")
         plt.legend()
         self.plot(title="validation dataset")
-        print("RMSE: %s", self.rmse(self.y_val, y_pred_val))
+        self.logger.info("Validation RMSE: %f", self.rmse(self.y_val, y_pred_val))
 
-    def test_reg(self, r_list=[0, 0.001, 0.01, 0.1, 1, 10]):
-        for r in r_list:
+    def test_reg(self):
+        for r in [0, 0.001, 0.01, 0.1, 1, 10]:
+            self.logger.info("Testing regularization parameter: %f", r)
             self.train_and_validate(r)
 
     def initial_histplot(self):
@@ -207,10 +231,10 @@ class CarPrice:
         log_price = np.log1p(self.df.msrp)
         self.plt_fig()
         sns.histplot(log_price)
-        self.plot(title="Histplot of log pricel", xlabel="log(MSRP)", ylabel="Count")
+        self.plot(title="Histplot of log price", xlabel="log(MSRP)", ylabel="Count")
 
     def prep_data(self):
-        print("prepping the data")
+        self.logger.debug("Preparing the data")
         n = len(self.df)
         n_val = int(0.2 * n)
         n_test = int(0.2 * n)
@@ -232,32 +256,48 @@ class CarPrice:
         del df_test["msrp"]
 
         self.df_train = df_train
-        print("prep train data")
+        self.logger.debug("Training data prepared")
         self.X_train, features = self.prepare_X(df_train)
         self.features = features
-        print("prep validation data")
+        self.logger.debug("Validation data prepared")
         self.X_val, features = self.prepare_X(df_val)
-        print("prep test data")
+        self.logger.debug("Test data prepared")
         self.X_test, features = self.prepare_X(df_test)
-        print("all data prepped")
+        self.logger.debug("All data prepared")
 
-    def train_linear_regression(self, r):
-        self.w0, self.w = self.train_linear_reg(r)
+    def train(self, r=0.0):
+        w0, w = self.train_linear_reg(r)
 
         y_pred = self.w0 + self.X_val.dot(self.w)
-        print("validation:", self.rmse(self.y_val, y_pred))
+        self.logger.debug("Validation RMSE: %f", self.rmse(self.y_val, y_pred))
 
         y_pred = self.w0 + self.X_test.dot(self.w)
-        print("test:", self.rmse(self.y_test, y_pred))
+        self.logger.debug("Test RMSE: %f", self.rmse(self.y_test, y_pred))
+        return self.w0, self.w
+
+    def validate(self):
+        y_pred = self.w0 + self.X_val.dot(self.w)
+        rmse_val = self.rmse(self.y_val, y_pred)
+        self.logger.debug("Validation RMSE: %f", rmse_val)
+        return rmse_val
+
+    def test(self):
+        y_pred = self.w0 + self.X_test.dot(self.w)
+        rmse_test = self.rmse(self.y_test, y_pred)
+        self.logger.debug("Test RMSE: %f", rmse_test)
+        return rmse_test
 
 
 def main():
+    logging.info("Starting CarPrice Predictor")
     price_predictor = CarPrice()
 
     price_predictor.initial_histplot()
 
     price_predictor.test_reg()
-    price_predictor.train_linear_regression(r=0.01)
+    price_predictor.train(r=0.01)
+    price_predictor.validate()
+    price_predictor.test()
 
     ad = {
         "city_mpg": 18,
@@ -276,27 +316,29 @@ def main():
         "vehicle_style": "wagon",
         "year": 2013,
     }
-    print(price_predictor.predict(ad))
+    predicted_price = price_predictor.predict(ad)[0]
+    print(f"Predicted price for Toyota Vanza: {predicted_price:.2f}")
 
     jeep_wrangler_2016 = {
-        "city_mpg": 17,  # Typical city mileage for a 2016 Jeep Wrangler
-        "driven_wheels": "four_wheel_drive",  # Jeep Wranglers are known for their 4WD capability
-        "engine_cylinders": 6.0,  # Assuming a 6-cylinder engine
-        "engine_fuel_type": "regular_unleaded",  # Common fuel type
-        "engine_hp": 285.0,  # Horsepower for a typical 2016 Wrangler
-        "highway_mpg": 21,  # Typical highway mileage
-        "make": "jeep",  # Manufacturer
-        "market_category": "suv,off_road",  # Market category
-        "model": "wrangler",  # Model name
-        "number_of_doors": 4.0,  # Typically a 2-door or 4-door option
-        "popularity": 1500,  # Hypothetical popularity score
-        "transmission_type": "manual",  # Assuming manual transmission
-        "vehicle_size": "large",  # Vehicle size category
-        "vehicle_style": "suv",  # Vehicle style
-        "year": 2016,  # Model year
+        "city_mpg": 17,
+        "driven_wheels": "four_wheel_drive",
+        "engine_cylinders": 6.0,
+        "engine_fuel_type": "regular_unleaded",
+        "engine_hp": 285.0,
+        "highway_mpg": 21,
+        "make": "jeep",
+        "market_category": "suv,off_road",
+        "model": "wrangler",
+        "number_of_doors": 4.0,
+        "popularity": 1500,
+        "transmission_type": "manual",
+        "vehicle_size": "large",
+        "vehicle_style": "suv",
+        "year": 2016,
     }
-
-    print(price_predictor.predict(jeep_wrangler_2016))
+    predicted_price = price_predictor.predict(jeep_wrangler_2016)[0]
+    print(f"Prediction for Jeep Wrangler 2016: {predicted_price:.2f}")
+    price_predictor.pdf.close()
 
 
 if __name__ == "__main__":

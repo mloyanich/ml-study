@@ -1,0 +1,23 @@
+[project]
+name = "car_price_predictor"
+version = "0.1.0"
+description = "A package for predicting car prices with CLI and Streamlit interfaces."
+authors = [{ name = "Your Name", email = "your.email@example.com" }]
+dependencies = [
+    "pandas",
+    "numpy",
+    "seaborn",
+    "matplotlib",
+    "typer",
+    "rich",
+    "streamlit",
+]
+
+[project.scripts]
+car-price-cli = "car_price_predictor.cli:app"
+car-price = "car_price_predictor.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
