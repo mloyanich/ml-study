@@ -266,7 +266,7 @@ class CarPrice:
         self.logger.debug("All data prepared")
 
     def train(self, r=0.0):
-        w0, w = self.train_linear_reg(r)
+        self.w0, self.w = self.train_linear_reg(r)
 
         y_pred = self.w0 + self.X_val.dot(self.w)
         self.logger.debug("Validation RMSE: %f", self.rmse(self.y_val, y_pred))

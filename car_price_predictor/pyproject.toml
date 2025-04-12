@@ -19,5 +19,6 @@ car-price = "car_price_predictor.cli:main"
 
 [dependency-groups]
 dev = [
+    "pre-commit>=4.2.0",
     "pytest>=8.3.5",
 ]
