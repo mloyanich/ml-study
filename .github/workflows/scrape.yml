@@ -1,6 +1,8 @@
 name: Scrape and Update Carvana CSV
 
 on:
+  schedule:
+    - cron: "0 * * * *" # ⏰ Run once every hour at minute 0
   workflow_dispatch: # Manual trigger still available
 
 jobs:
@@ -30,6 +32,14 @@ jobs:
         run: chrome --version
         
       - name: 🤖 Run scraper 1
+        run: python car_price_predictor/src/carvana_prices.py
+      - name: 🤖 Run scraper 2
+        run: python car_price_predictor/src/carvana_prices.py
+      - name: 🤖 Run scraper 3
+        run: python car_price_predictor/src/carvana_prices.py
+      - name: 🤖 Run scraper 4
+        run: python car_price_predictor/src/carvana_prices.py
+      - name: 🤖 Run scraper 5
         run: python car_price_predictor/src/carvana_prices.py
 
       - name: 📤 Commit and push CSV
