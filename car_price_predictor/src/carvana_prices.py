@@ -136,4 +136,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     page_to_scrape = args.page if args.page else random.randint(1, 100)
-    scrape_carvana_page(page_to_scrape)
+    last_page = page_to_scrape + 3
+    try:
+        while page_to_scrape <= last_page:
+            scrape_carvana_page(page_to_scrape)
+            page_to_scrape += 1
+            time.sleep(random.randint(5, 10))
+    except Exception as e:
+        print(f"Scraping interrupted. {e}")
