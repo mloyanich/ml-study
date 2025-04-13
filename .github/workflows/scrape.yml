@@ -31,19 +31,9 @@ jobs:
         
       - name: 🤖 Run scraper 1
         run: python car_price_predictor/src/carvana_prices.py
-      - name: 🤖 Run scraper 2
-        run: python car_price_predictor/src/carvana_prices.py
-      - name: 🤖 Run scraper 3
-        run: python car_price_predictor/src/carvana_prices.py
-      - name: 🤖 Run scraper 4
-        run: python car_price_predictor/src/carvana_prices.py
-      - name: 🤖 Run scraper 5
-        run: python car_price_predictor/src/carvana_prices.py
 
       - name: 📤 Commit and push CSV
         run: |
-          git config --global user.name "carvana-bot"
-          git config --global user.email "carvana-bot@gmail.com"
           git add carvana_cars.csv
           git commit -m "🔄 Hourly update of carvana_cars.csv [automated]" || echo "No changes to commit"
           git push
