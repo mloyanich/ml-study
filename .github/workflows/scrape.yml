@@ -23,14 +23,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium beautifulsoup4
 
-      - name: 📥 Install Chrome & chromedriver
+      - name: 📥 Install Chrome & Chromedriver (non-snap)
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser
-          sudo apt-get install -y chromium-chromedriver
-          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
+          CHROME_VERSION=$(google-chrome --version | grep -oP "\d+\.\d+\.\d+\.\d+")
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
+          wget -N https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+          unzip chromedriver_linux64.zip
+          chmod +x chromedriver
+          sudo mv -f chromedriver /usr/local/bin/chromedriver
+          sudo ln -sf /usr/local/bin/chromedriver /usr/bin/chromedriver
 
-      - name: 🤖 Run scraper
+      - name: 🤖 Run scraper 1
+        run: python scrape_carvana.py
+      - name: 🤖 Run scraper 2
+        run: python scrape_carvana.py
+      - name: 🤖 Run scraper 3
+        run: python scrape_carvana.py
+      - name: 🤖 Run scraper 4
+        run: python scrape_carvana.py
+      - name: 🤖 Run scraper 5
         run: python scrape_carvana.py
 
       - name: 📤 Commit and push CSV
