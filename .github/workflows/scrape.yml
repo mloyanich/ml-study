@@ -23,17 +23,26 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium beautifulsoup4
 
-      - name: 📥 Install Chrome & Chromedriver (headless, safe)
+      - name: 📥 Install Chrome + matching Chromedriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libnss3 libxss1 libappindicator3-1 libatk-bridge2.0-0 libgtk-3-0 fonts-liberation
+          sudo apt-get install -y wget unzip
 
+          # Install latest Google Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
+          # Get the installed Chrome version
           CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+')
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
-          wget -N https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
+          CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d '.' -f 1)
+
+          echo "🧭 Detected Chrome version: $CHROME_VERSION (major: $CHROME_MAJOR)"
+
+          # Get matching Chromedriver version
+          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR")
+          echo "⬇️ Downloading Chromedriver $CHROMEDRIVER_VERSION for Chrome $CHROME_MAJOR"
+
+          wget -q "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
           unzip -o chromedriver_linux64.zip
           chmod +x chromedriver
           sudo mv chromedriver /usr/local/bin/chromedriver
