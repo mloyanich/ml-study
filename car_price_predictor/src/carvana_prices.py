@@ -62,11 +62,13 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
     if os.path.exists(csv_filename):
         with open(csv_filename, "r", newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
-            existing_urls = {row["url"] for row in reader}
+            for row in reader:
+                print(row)
+            #existing_urls = {row["url"] for row in reader}
     else:
         print("no csv file found, creating new one")
         existing_urls = set()
-
+    return
     # Append new rows to CSV, skipping duplicates
     preferred_order = ["brand", "model", "year", "mileage", "price", "name", "url"]
     with open(csv_filename, "a", newline="", encoding="utf-8") as f:
