@@ -43,6 +43,7 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
                 "name": data.get("name"),
                 "model": data.get("model"),
                 "brand": data.get("brand"),
+                "year": data.get("name").split(" ")[0],
                 "price": data.get("offers", {}).get("price"),
                 "mileage": data.get("mileageFromOdometer"),
                 "url": data.get("offers", {}).get("url"),
@@ -65,8 +66,9 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
         existing_urls = set()
 
     # Append new rows to CSV, skipping duplicates
+    preferred_order = ["brand", "model", "year", "mileage", "price", "name", "url"]
     with open(csv_filename, "a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=cars[0].keys())
+        writer = csv.DictWriter(f, fieldnames=preferred_order)
         if f.tell() == 0:
             writer.writeheader()  # Write header only if the file is empty
         new_cars_count = 0
@@ -89,5 +91,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    page_to_scrape = args.page if args.page else random.randint(8, 130)
+    page_to_scrape = args.page if args.page else random.randint(1, 130)
     scrape_carvana_page(page_to_scrape)
