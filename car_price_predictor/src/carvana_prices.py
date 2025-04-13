@@ -135,7 +135,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    page_to_scrape = args.page if args.page else random.randint(1, 100)
+    page_to_scrape = args.page if args.page else random.randint(1, 50)
     last_page = page_to_scrape + 3
     try:
         while page_to_scrape <= last_page:
