@@ -27,22 +27,6 @@ jobs:
       - name: Test
         run: chrome --version
         
-      - name: 📥 Install Chrome v134 + Chromedriver
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget unzip
-
-          # Install Chrome 134 manually
-          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_134.0.6268.0-1_amd64.deb
-          sudo dpkg -i google-chrome-stable_134.0.6268.0-1_amd64.deb || sudo apt-get -f install -y
-
-          # Get matching chromedriver for v134
-          CHROMEDRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE_134)
-          wget -q "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
-          unzip -o chromedriver_linux64.zip
-          chmod +x chromedriver
-          sudo mv chromedriver /usr/local/bin/chromedriver
-
       - name: 🤖 Run scraper 1
         run: python car_price_predictor/src/carvana_prices.py
       - name: 🤖 Run scraper 2
