@@ -23,19 +23,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install selenium beautifulsoup4
 
-      - name: 📥 Install Chrome & Chromedriver (non-snap)
+      - name: 📥 Install Chrome & Chromedriver (no snap)
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4
+          sudo apt-get install -y wget unzip xvfb libxi6 libnss3 libxss1 libappindicator3-1 libasound2 fonts-liberation libatk-bridge2.0-0 libgtk-3-0
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
-          CHROME_VERSION=$(google-chrome --version | grep -oP "\d+\.\d+\.\d+\.\d+")
-          CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE")
+
+          CHROMEDRIVER_VERSION=$(curl -sS https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
           wget -N https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
-          unzip chromedriver_linux64.zip
+          unzip -o chromedriver_linux64.zip
           chmod +x chromedriver
           sudo mv -f chromedriver /usr/local/bin/chromedriver
-          sudo ln -sf /usr/local/bin/chromedriver /usr/bin/chromedriver
 
       - name: 🤖 Run scraper 1
         run: python scrape_carvana.py
