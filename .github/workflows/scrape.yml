@@ -1,0 +1,44 @@
+name: Scrape and Update Carvana CSV
+
+on:
+  schedule:
+    - cron: "0 * * * *" # ⏰ Run once every hour at minute 0
+  workflow_dispatch: # Manual trigger still available
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10" # Stable version for Selenium etc.
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install selenium beautifulsoup4
+
+      - name: 📥 Install Chrome & chromedriver
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          sudo apt-get install -y chromium-chromedriver
+          sudo ln -s /usr/lib/chromium-browser/chromedriver /usr/bin/chromedriver
+
+      - name: 🤖 Run scraper
+        run: python scrape_carvana.py
+
+      - name: 📤 Commit and push CSV
+        run: |
+          git config --global user.name "carvana-bot"
+          git config --global user.email "bot@example.com"
+          git add carvana_cars.csv
+          git commit -m "🔄 Hourly update of carvana_cars.csv [automated]" || echo "No changes to commit"
+          git push
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
