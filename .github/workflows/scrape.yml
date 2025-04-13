@@ -39,15 +39,15 @@ jobs:
           sudo mv chromedriver /usr/local/bin/chromedriver
 
       - name: 🤖 Run scraper 1
-        run: python scrape_carvana.py
+        run: python car_price_predictor/src/carvana_prices.py
       - name: 🤖 Run scraper 2
-        run: python scrape_carvana.py
+        run: python car_price_predictor/src/carvana_prices.py
       - name: 🤖 Run scraper 3
-        run: python scrape_carvana.py
+        run: python car_price_predictor/src/carvana_prices.py
       - name: 🤖 Run scraper 4
-        run: python scrape_carvana.py
+        run: python car_price_predictor/src/carvana_prices.py
       - name: 🤖 Run scraper 5
-        run: python scrape_carvana.py
+        run: python car_price_predictor/src/carvana_prices.py
 
       - name: 📤 Commit and push CSV
         run: |
