@@ -94,5 +94,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    page_to_scrape = args.page if args.page else random.randint(1, 13)
+    page_to_scrape = args.page if args.page else random.randint(1, 100)
     scrape_carvana_page(page_to_scrape)
