@@ -10,6 +10,8 @@ jobs:
     steps:
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
+        with:
+          persist-credentials: true
 
       - name: 🐍 Set up Python
         uses: actions/setup-python@v4
@@ -41,7 +43,7 @@ jobs:
       - name: 📤 Commit and push CSV
         run: |
           git config --global user.name "carvana-bot"
-          git config --global user.email "bot@example.com"
+          git config --global user.email "carvana-bot@gmail.com"
           git add carvana_cars.csv
           git commit -m "🔄 Hourly update of carvana_cars.csv [automated]" || echo "No changes to commit"
           git push
