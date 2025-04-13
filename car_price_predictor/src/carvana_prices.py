@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 
 
 def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
+    print(f"Scraping page {page_num}...")
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
     options.add_argument(
@@ -22,7 +23,7 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
 
     driver = webdriver.Chrome(options=options)
     url = f"https://www.carvana.com/cars?page={page_num}"
-    print(f"Scraping page {page_num}...")
+    
 
     driver.get(url)
     time.sleep(random.randint(8, 12))  # Give Cloudflare a chance to finish
