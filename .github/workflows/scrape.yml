@@ -1,8 +1,6 @@
 name: Scrape and Update Carvana CSV
 
 on:
-  schedule:
-    - cron: "0 * * * *" # ⏰ Run once every hour at minute 0
   workflow_dispatch: # Manual trigger still available
 
 jobs:
