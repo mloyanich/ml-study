@@ -141,6 +141,7 @@ if __name__ == "__main__":
         while page_to_scrape <= last_page:
             scrape_carvana_page(page_to_scrape)
             page_to_scrape += 1
+            print(f"Page {page_to_scrape} scraped. Sleeping for a bit...")
             time.sleep(random.randint(5, 10))
     except Exception as e:
         print(f"Scraping interrupted. {e}")
