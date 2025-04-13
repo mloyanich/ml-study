@@ -48,6 +48,7 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
                 "mileage": data.get("mileageFromOdometer"),
                 "url": data.get("offers", {}).get("url"),
             }
+            print(car)
             cars.append(car)
         except Exception as e:
             print("Parse error:", e)
@@ -56,13 +57,14 @@ def scrape_carvana_page(page_num, csv_filename="carvana_cars.csv"):
             "❌ No car data found. Cloudflare might’ve blocked the page or the page is empty."
         )
         return
-
+    print(f"found {len(cars)} cars")
     # Load existing CSV to check for duplicates
     if os.path.exists(csv_filename):
         with open(csv_filename, "r", newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
             existing_urls = {row["url"] for row in reader}
     else:
+        print("no csv file found, creating new one")
         existing_urls = set()
 
     # Append new rows to CSV, skipping duplicates
@@ -91,5 +93,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    page_to_scrape = args.page if args.page else random.randint(1, 130)
+    page_to_scrape = args.page if args.page else random.randint(1, 13)
     scrape_carvana_page(page_to_scrape)
