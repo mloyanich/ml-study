@@ -26,6 +26,6 @@ pyarrow
 uv venv --python 3.9.7 # install python 3.9.7 that is used in the course
 source .venv/bin/activate # activate the environment
 python -V # should be 3.9.7
-uv pip install -r requirements.txt
+uv pip install -r requirements.txt # install packages
 jupyter notebook # run jupyter notebook
 ```
