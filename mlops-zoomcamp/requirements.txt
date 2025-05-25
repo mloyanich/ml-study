@@ -1,0 +1,9 @@
+# 01-intro
+pandas
+scikit-learn
+notebook
+seaborn
+pyarrow
+
+# 02-experiment-tracking
+mlflow
